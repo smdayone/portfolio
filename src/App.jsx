@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { motion, useInView, useScroll, useTransform, AnimatePresence } from "framer-motion";
+import { motion, useInView, useScroll, useTransform, useSpring, useMotionValue, AnimatePresence } from "framer-motion";
 import { config, colors, skills, projects, experience, education, t } from "./data";
 import "./index.css";
 
@@ -33,6 +33,95 @@ function FadeIn({ children, delay = 0, y = 30, className = "" }) {
     >
       {children}
     </motion.div>
+  );
+}
+
+// ── MAGNETIC CURSOR ──────────────────────────────────────────────
+function MagneticCursor() {
+  const mx = useMotionValue(-100);
+  const my = useMotionValue(-100);
+  const [variant, setVariant] = useState("default");
+
+  const dotX = useSpring(mx, { stiffness: 600, damping: 40 });
+  const dotY = useSpring(my, { stiffness: 600, damping: 40 });
+  const ringX = useSpring(mx, { stiffness: 140, damping: 18 });
+  const ringY = useSpring(my, { stiffness: 140, damping: 18 });
+
+  useEffect(() => {
+    const move = (e) => { mx.set(e.clientX); my.set(e.clientY); };
+    const over = (e) => { if (e.target.closest("a, button")) setVariant("hover"); };
+    const out  = (e) => { if (e.target.closest("a, button")) setVariant("default"); };
+    window.addEventListener("mousemove", move);
+    document.addEventListener("mouseover", over);
+    document.addEventListener("mouseout", out);
+    return () => {
+      window.removeEventListener("mousemove", move);
+      document.removeEventListener("mouseover", over);
+      document.removeEventListener("mouseout", out);
+    };
+  }, []);
+
+  return (
+    <>
+      <motion.div className="cursor__dot" style={{ x: dotX, y: dotY }}
+        animate={variant === "hover" ? { scale: 0 } : { scale: 1 }}
+        transition={{ duration: 0.15 }}
+      />
+      <motion.div className="cursor__ring" style={{ x: ringX, y: ringY }}
+        animate={variant === "hover" ? { scale: 2.4, opacity: 0.5 } : { scale: 1, opacity: 1 }}
+        transition={{ duration: 0.25 }}
+      />
+    </>
+  );
+}
+
+// ── STAGGER ───────────────────────────────────────────────────────
+const staggerContainer = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.09, delayChildren: 0.05 } },
+};
+const staggerItemUp = {
+  hidden: { opacity: 0, y: 56 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.65, ease: [0.22, 1, 0.36, 1] } },
+};
+const staggerItemLeft = {
+  hidden: { opacity: 0, x: -40 },
+  visible: { opacity: 1, x: 0, transition: { duration: 0.65, ease: [0.22, 1, 0.36, 1] } },
+};
+
+function StaggerReveal({ children, className = "" }) {
+  const ref = useRef(null);
+  const inView = useInView(ref, { once: true, margin: "-60px" });
+  return (
+    <motion.div ref={ref} className={className}
+      variants={staggerContainer} initial="hidden"
+      animate={inView ? "visible" : "hidden"}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
+function SectionHeader({ label, title, style }) {
+  const ref = useRef(null);
+  const inView = useInView(ref, { once: true, margin: "-60px" });
+  return (
+    <div ref={ref} className="section__header" style={style}>
+      <motion.span className="section__label"
+        initial={{ opacity: 0, x: -24 }}
+        animate={inView ? { opacity: 1, x: 0 } : {}}
+        transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+      >
+        {label}
+      </motion.span>
+      <motion.h2 className="section__title"
+        initial={{ opacity: 0, y: 36 }}
+        animate={inView ? { opacity: 1, y: 0 } : {}}
+        transition={{ duration: 0.65, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}
+      >
+        {title}
+      </motion.h2>
+    </div>
   );
 }
 
@@ -187,47 +276,40 @@ function Skills({ tr }) {
   return (
     <section id="about" className="section">
       <div className="container">
-        <FadeIn>
-          <div className="section__header">
-            <span className="section__label">02</span>
-            <h2 className="section__title">{tr(t.sections.skills)}</h2>
-          </div>
-        </FadeIn>
+        <SectionHeader label="02" title={tr(t.sections.skills)} />
 
-        <div className="skills__grid">
+        <StaggerReveal className="skills__grid">
           {skills.map((skill, i) => (
-            <FadeIn key={skill.name} delay={i * 0.06}>
-              <div className="skill__item">
-                <div className="skill__top">
-                  <span className="skill__name">{skill.name}</span>
-                  <span className="skill__pct">{skill.level}%</span>
-                </div>
-                <div className="skill__bar">
-                  <motion.div
-                    className="skill__fill"
-                    initial={{ width: 0 }}
-                    whileInView={{ width: `${skill.level}%` }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 1.2, delay: i * 0.06, ease: [0.22, 1, 0.36, 1] }}
-                  />
-                </div>
+            <motion.div key={skill.name} variants={staggerItemUp} className="skill__item">
+              <div className="skill__top">
+                <span className="skill__name">{skill.name}</span>
+                <span className="skill__pct">{skill.level}%</span>
               </div>
-            </FadeIn>
+              <div className="skill__bar">
+                <motion.div
+                  className="skill__fill"
+                  initial={{ width: 0 }}
+                  whileInView={{ width: `${skill.level}%` }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 1.2, delay: i * 0.06, ease: [0.22, 1, 0.36, 1] }}
+                />
+              </div>
+            </motion.div>
           ))}
-        </div>
+        </StaggerReveal>
       </div>
     </section>
   );
 }
 
 // ── PROJECT CARD ─────────────────────────────────────────────────
-function ProjectCard({ project, index, tr }) {
+function ProjectCard({ project, tr }) {
   const [hovered, setHovered] = useState(false);
 
   return (
-    <FadeIn delay={index * 0.1}>
-      <motion.div
-        className="project-card"
+    <motion.div
+      variants={staggerItemUp}
+      className="project-card"
         style={{ "--card-color": project.color, "--card-bg": project.bg }}
         onHoverStart={() => setHovered(true)}
         onHoverEnd={() => setHovered(false)}
@@ -277,7 +359,6 @@ function ProjectCard({ project, index, tr }) {
           transition={{ duration: 0.4 }}
         />
       </motion.div>
-    </FadeIn>
   );
 }
 
@@ -286,18 +367,13 @@ function Projects({ tr }) {
   return (
     <section id="projects" className="section section--alt">
       <div className="container">
-        <FadeIn>
-          <div className="section__header">
-            <span className="section__label">03</span>
-            <h2 className="section__title">{tr(t.sections.projects)}</h2>
-          </div>
-        </FadeIn>
+        <SectionHeader label="03" title={tr(t.sections.projects)} />
 
-        <div className="projects__grid">
-          {projects.map((p, i) => (
-            <ProjectCard key={p.id} project={p} index={i} tr={tr} />
+        <StaggerReveal className="projects__grid">
+          {projects.map((p) => (
+            <ProjectCard key={p.id} project={p} tr={tr} />
           ))}
-        </div>
+        </StaggerReveal>
       </div>
     </section>
   );
@@ -308,64 +384,50 @@ function Experience({ tr }) {
   return (
     <section id="experience" className="section">
       <div className="container">
-        <FadeIn>
-          <div className="section__header">
-            <span className="section__label">04</span>
-            <h2 className="section__title">{tr(t.sections.experience)}</h2>
-          </div>
-        </FadeIn>
+        <SectionHeader label="04" title={tr(t.sections.experience)} />
 
-        <div className="timeline">
+        <StaggerReveal className="timeline">
           {experience.map((exp, i) => (
-            <FadeIn key={i} delay={i * 0.08}>
-              <div className="timeline__item">
-                <div className="timeline__dot">
-                  {exp.current && <div className="timeline__dot-pulse" />}
-                </div>
-                <div className="timeline__content">
-                  <div className="timeline__top">
-                    <div>
-                      <div className="timeline__role">{tr(exp.role)}</div>
-                      <div className="timeline__company">{exp.company}</div>
-                    </div>
-                    <div className="timeline__period">
-                      {exp.current && <span className="timeline__current">Now</span>}
-                      {exp.period}
-                    </div>
-                  </div>
-                  <p className="timeline__desc">{tr(exp.description)}</p>
-                </div>
+            <motion.div key={i} variants={staggerItemLeft} className="timeline__item">
+              <div className="timeline__dot">
+                {exp.current && <div className="timeline__dot-pulse" />}
               </div>
-            </FadeIn>
+              <div className="timeline__content">
+                <div className="timeline__top">
+                  <div>
+                    <div className="timeline__role">{tr(exp.role)}</div>
+                    <div className="timeline__company">{exp.company}</div>
+                  </div>
+                  <div className="timeline__period">
+                    {exp.current && <span className="timeline__current">Now</span>}
+                    {exp.period}
+                  </div>
+                </div>
+                <p className="timeline__desc">{tr(exp.description)}</p>
+              </div>
+            </motion.div>
           ))}
-        </div>
+        </StaggerReveal>
 
-        <FadeIn delay={0.3}>
-          <div className="section__header" style={{ marginTop: "5rem" }}>
-            <span className="section__label">05</span>
-            <h2 className="section__title">{tr(t.sections.education)}</h2>
-          </div>
-        </FadeIn>
+        <SectionHeader label="05" title={tr(t.sections.education)} style={{ marginTop: "5rem" }} />
 
-        <div className="timeline">
+        <StaggerReveal className="timeline">
           {education.map((edu, i) => (
-            <FadeIn key={i} delay={i * 0.08}>
-              <div className="timeline__item">
-                <div className="timeline__dot" />
-                <div className="timeline__content">
-                  <div className="timeline__top">
-                    <div>
-                      <div className="timeline__role">{tr(edu.title)}</div>
-                      <div className="timeline__company">{edu.institution}</div>
-                    </div>
-                    <div className="timeline__period">{edu.period}</div>
+            <motion.div key={i} variants={staggerItemLeft} className="timeline__item">
+              <div className="timeline__dot" />
+              <div className="timeline__content">
+                <div className="timeline__top">
+                  <div>
+                    <div className="timeline__role">{tr(edu.title)}</div>
+                    <div className="timeline__company">{edu.institution}</div>
                   </div>
-                  <p className="timeline__desc">{tr(edu.description)}</p>
+                  <div className="timeline__period">{edu.period}</div>
                 </div>
+                <p className="timeline__desc">{tr(edu.description)}</p>
               </div>
-            </FadeIn>
+            </motion.div>
           ))}
-        </div>
+        </StaggerReveal>
       </div>
     </section>
   );
@@ -426,6 +488,7 @@ export default function App() {
 
   return (
     <div className="app">
+      <MagneticCursor />
       <Nav lang={lang} setLang={setLang} dark={dark} setDark={setDark} tr={tr} />
       <Hero tr={tr} />
       <Skills tr={tr} />
