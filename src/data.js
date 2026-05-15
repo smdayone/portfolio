@@ -17,7 +17,7 @@ export const config = {
   },
   location: "Terni, Umbria — Italy",
   email: "rekasamuel0@gmail.com",
-  photo: "/profile.jpg",
+  photo: `${process.env.PUBLIC_URL}/profile.jpg`,
   links: {
     fiverr: "https://www.fiverr.com/s/NNXEG8V",
     linkedin: "https://www.linkedin.com/in/samuelreka",
