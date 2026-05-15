@@ -212,8 +212,6 @@ img { max-width: 100%; display: block; }
   letter-spacing: -0.04em;
   color: var(--text);
   margin-bottom: 24px;
-  display: flex;
-  flex-wrap: wrap;
 }
 
 .hero__name span { display: inline-block; }
@@ -677,8 +675,7 @@ img { max-width: 100%; display: block; }
 
 .contact__sub {
   font-size: 16px;
-  color: rgba(255,255,255,0.5);
-  max-width: 480px;
+  color: color-mix(in srgb, var(--bg) 55%, transparent);
   margin-bottom: 40px;
   line-height: 1.7;
 }
@@ -698,13 +695,13 @@ img { max-width: 100%; display: block; }
 }
 
 .section--contact .btn--outline {
-  border-color: rgba(255,255,255,0.25);
-  color: rgba(255,255,255,0.8);
+  border-color: color-mix(in srgb, var(--bg) 30%, transparent);
+  color: color-mix(in srgb, var(--bg) 80%, transparent);
 }
 
 .section--contact .btn--outline:hover {
-  border-color: rgba(255,255,255,0.6);
-  color: #fff;
+  border-color: color-mix(in srgb, var(--bg) 65%, transparent);
+  color: var(--bg);
 }
 
 .contact__social {
@@ -712,15 +709,15 @@ img { max-width: 100%; display: block; }
   align-items: center;
   gap: 16px;
   font-size: 13px;
-  color: rgba(255,255,255,0.35);
+  color: color-mix(in srgb, var(--bg) 40%, transparent);
 }
 
 .contact__social a {
-  color: rgba(255,255,255,0.5);
+  color: color-mix(in srgb, var(--bg) 55%, transparent);
   transition: color var(--transition);
 }
 
-.contact__social a:hover { color: rgba(255,255,255,0.9); }
+.contact__social a:hover { color: var(--bg); }
 
 /* ── FOOTER ────────────────────────────────────────────────────── */
 .footer {

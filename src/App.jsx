@@ -12,7 +12,7 @@ function useLang() {
 
 // ── THEME HOOK ───────────────────────────────────────────────────
 function useTheme() {
-  const [dark, setDark] = useState(false);
+  const [dark, setDark] = useState(true);
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", dark ? "dark" : "light");
   }, [dark]);

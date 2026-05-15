@@ -98,23 +98,23 @@ export const projects = [
   },
   {
     id: "granvisual",
-    name: "GranVisual",
+    name: "GRANVISUAL",
     tagline: {
       en: "Social media content strategy & production",
       it: "Strategia e produzione contenuti social",
       es: "Estrategia y producción de contenido social",
     },
     description: {
-      en: "Joined GranVisual as Social Media Content Creator. Created and managed short-form video content for TikTok, Instagram, and YouTube. Built content calendar and production workflow from concept to publishing.",
-      it: "Content Creator per GranVisual. Creazione e gestione contenuti video per TikTok, Instagram e YouTube con calendario editoriale strutturato.",
-      es: "Content Creator para GranVisual. Creación y gestión de contenido video para TikTok, Instagram y YouTube con calendario editorial estructurado.",
+      en: "Joined GRANVISUAL as Social Media Content Creator. Created and managed short-form video content for TikTok, Instagram, and YouTube. Built content calendar and production workflow from concept to publishing.",
+      it: "Content Creator per GRANVISUAL. Creazione e gestione contenuti video per TikTok, Instagram e YouTube con calendario editoriale strutturato.",
+      es: "Content Creator para GRANVISUAL. Creación y gestión de contenido video para TikTok, Instagram y YouTube con calendario editorial estructurado.",
     },
     tags: ["TikTok", "Instagram", "YouTube", "Content"],
     stats: [
       { value: "3", label: "Platforms" },
       { value: "3mo", label: "Duration" },
     ],
-    color: "#1a1a1a",
+    color: "#5b5b5b",
     bg: "#F5F2EC",
     link: null,
   },
@@ -182,7 +182,7 @@ export const projects = [
     ],
     color: "#A8D5A2",
     bg: "#0E0E0E",
-    link: null,
+    link: "https://www.instagram.com/lotusclothing778/",
   },
 ];
 
@@ -191,7 +191,7 @@ export const projects = [
 export const experience = [
   {
     role: { en: "Freelance Video Editor & Content Creator", it: "Video Editor & Content Creator Freelance", es: "Editor de Video & Creador de Contenido Freelance" },
-    company: "Fiverr — @smdayone",
+    company: "Fiverr",
     period: "2026 — Present",
     description: {
       en: "Creating short-form video ads for e-commerce products. Specializing in hook-first video structure optimized for TikTok, Instagram Reels, and YouTube Shorts.",
