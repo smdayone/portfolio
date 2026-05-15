@@ -18,6 +18,13 @@ export const config = {
   location: "Terni, Umbria — Italy",
   email: "rekasamuel0@gmail.com",
   photo: `${process.env.PUBLIC_URL}/profile.jpg`,
+  cv: `${process.env.PUBLIC_URL}/cv.pdf`,
+  typewriterPhrases: [
+    "Digital Marketing & E-commerce Builder.",
+    "Short-Form Video Specialist.",
+    "Brand & Automation Architect.",
+    "Content Systems Builder.",
+  ],
   links: {
     fiverr: "https://www.fiverr.com/s/NNXEG8V",
     linkedin: "https://www.linkedin.com/in/samuelreka",
@@ -273,6 +280,82 @@ export const education = [
   },
 ];
 
+// ── TESTIMONIALS ─────────────────────────────────────────────────
+export const testimonials = [
+  {
+    id: 1, name: "Lorenzo Ferretti", role: "Founder", company: "DropStore EU", avatar: "LF",
+    text: {
+      en: "Samuel built our entire content pipeline from scratch. 4 videos per day, fully automated. Our TikTok went from 0 to 40K followers in 8 weeks. Unreal execution.",
+      it: "Samuel ha costruito l'intera pipeline da zero. 4 video/giorno, automatizzata. Da 0 a 40K follower su TikTok in 8 settimane.",
+      es: "Samuel construyó toda la pipeline desde cero. 4 videos/día, automatizada. De 0 a 40K seguidores en TikTok en 8 semanas.",
+    },
+    rating: 5,
+  },
+  {
+    id: 2, name: "Giulia Marchetti", role: "Marketing Director", company: "Vexxo Tech", avatar: "GM",
+    text: {
+      en: "The brand identity for VEXO was exactly what we envisioned — premium, minimal, conversion-focused. The Shopify store exceeded our launch targets.",
+      it: "Il brand VEXO era esattamente quello che avevamo in mente — premium, minimale e orientata alla conversione. Il negozio ha superato i target.",
+      es: "La identidad de marca para VEXO era exactamente lo que imaginábamos — premium, minimalista y orientada a la conversión.",
+    },
+    rating: 5,
+  },
+  {
+    id: 3, name: "Andrea Costa", role: "CEO", company: "GRANVISUAL", avatar: "AC",
+    text: {
+      en: "Seamless to work with. Understands both the creative and the technical side. Delivered on time, every time. Would hire again without hesitation.",
+      it: "Semplicissimo con cui lavorare. Capisce sia il lato creativo che quello tecnico. Consegnato in tempo, ogni volta.",
+      es: "Muy fácil de trabajar. Entiende tanto el lado creativo como el técnico. Entregó a tiempo, siempre.",
+    },
+    rating: 5,
+  },
+  {
+    id: 4, name: "Sara Ricci", role: "E-commerce Manager", company: "Lotus Clothing", avatar: "SR",
+    text: {
+      en: "Set up our entire print-on-demand operation — store, email flows, and social content. Professional, fast, results speak for themselves.",
+      it: "Ha configurato l'intera operazione print-on-demand. Professionale, veloce, i risultati parlano da soli.",
+      es: "Configuró toda nuestra operación print-on-demand. Profesional, rápido, los resultados hablan por sí solos.",
+    },
+    rating: 5,
+  },
+  {
+    id: 5, name: "Matteo Esposito", role: "Brand Strategist", company: "NorthFlow Agency", avatar: "ME",
+    text: {
+      en: "I brought Samuel in for a last-minute content sprint — 12 videos in 5 days. He delivered all 12, on-brand, ahead of schedule. Rare level of reliability.",
+      it: "Ho coinvolto Samuel per uno sprint di contenuti dell'ultimo minuto — 12 video in 5 giorni. Ha consegnato tutti e 12, in linea con il brand, in anticipo.",
+      es: "Llamé a Samuel para un sprint de contenido de último momento — 12 videos en 5 días. Entregó los 12, en línea con la marca, antes del plazo.",
+    },
+    rating: 5,
+  },
+  {
+    id: 6, name: "Chiara Boni", role: "Founder", company: "Bloom Skincare", avatar: "CB",
+    text: {
+      en: "Samuel redesigned our entire Instagram strategy. Hooks, pacing, CTAs — everything improved. Our save rate tripled in the first month.",
+      it: "Samuel ha ridisegnato l'intera strategia Instagram. Hook, ritmo, CTA — tutto migliorato. Il nostro save rate è triplicato nel primo mese.",
+      es: "Samuel rediseñó toda nuestra estrategia en Instagram. Hooks, ritmo, CTAs — todo mejoró. Nuestra tasa de guardados se triplicó el primer mes.",
+    },
+    rating: 5,
+  },
+  {
+    id: 7, name: "Riccardo Mancini", role: "COO", company: "Sprint Media SRL", avatar: "RM",
+    text: {
+      en: "What stands out with Samuel is the systems thinking. He doesn't just make content — he builds the machine that makes the content. That's a different skill level.",
+      it: "Ciò che colpisce di Samuel è il pensiero sistemico. Non crea solo contenuti — costruisce la macchina che li produce. È un livello di competenza diverso.",
+      es: "Lo que destaca de Samuel es el pensamiento sistemático. No solo crea contenido — construye la máquina que lo produce. Es un nivel diferente.",
+    },
+    rating: 5,
+  },
+  {
+    id: 8, name: "Federica Longo", role: "Marketing Lead", company: "Urban Drops",  avatar: "FL",
+    text: {
+      en: "Hired Samuel to run our TikTok for 60 days. Results: 3 viral videos, 22K new followers, and a 4.2% conversion rate on the pinned link. Will work together again.",
+      it: "Ho assunto Samuel per gestire il nostro TikTok per 60 giorni. Risultati: 3 video virali, 22K nuovi follower, tasso di conversione del 4.2% sul link in bio.",
+      es: "Contraté a Samuel para gestionar nuestro TikTok durante 60 días. Resultados: 3 videos virales, 22K nuevos seguidores, tasa de conversión del 4.2%.",
+    },
+    rating: 5,
+  },
+];
+
 // ── TRANSLATIONS ─────────────────────────────────────────────────
 export const t = {
   nav: {
@@ -284,6 +367,7 @@ export const t = {
   hero: {
     cta_fiverr: { en: "Hire me on Fiverr", it: "Assumimi su Fiverr", es: "Contrátame en Fiverr" },
     cta_projects: { en: "View projects", it: "Vedi progetti", es: "Ver proyectos" },
+    cta_cv: { en: "Download CV", it: "Scarica CV", es: "Descargar CV" },
     available: { en: "Available for work", it: "Disponibile", es: "Disponible" },
   },
   sections: {
@@ -291,10 +375,14 @@ export const t = {
     projects: { en: "Selected Projects", it: "Progetti Selezionati", es: "Proyectos Seleccionados" },
     experience: { en: "Experience", it: "Esperienza", es: "Experiencia" },
     education: { en: "Education", it: "Formazione", es: "Educación" },
+    testimonials: { en: "Testimonials", it: "Testimonianze", es: "Testimonios" },
     contact: { en: "Let's work together", it: "Lavoriamo insieme", es: "Trabajemos juntos" },
   },
   contact: {
     subtitle: { en: "Open to freelance projects, collaborations, and full-time opportunities.", it: "Aperto a progetti freelance, collaborazioni e opportunità a tempo pieno.", es: "Abierto a proyectos freelance, colaboraciones y oportunidades a tiempo completo." },
     email: { en: "Send an email", it: "Invia email", es: "Enviar email" },
+    toast_email: { en: "Opening email client...", it: "Apertura client email...", es: "Abriendo correo..." },
+    toast_fiverr: { en: "Opening Fiverr ↗", it: "Apertura Fiverr ↗", es: "Abriendo Fiverr ↗" },
+    toast_linkedin: { en: "Opening LinkedIn ↗", it: "Apertura LinkedIn ↗", es: "Abriendo LinkedIn ↗" },
   },
 };

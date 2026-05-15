@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion, useInView, useScroll, useTransform, useSpring, useMotionValue, useMotionTemplate, AnimatePresence } from "framer-motion";
 import Lenis from "lenis";
-import { config, colors, skills, projects, experience, education, t } from "./data";
+import { config, colors, skills, projects, experience, education, testimonials, t } from "./data";
+import { TypeAnimation } from "react-type-animation";
+import toast, { Toaster } from "react-hot-toast";
 import "./index.css";
 
 // ── LANGUAGE HOOK ────────────────────────────────────────────────
@@ -34,47 +36,6 @@ function FadeIn({ children, delay = 0, y = 30, className = "" }) {
     >
       {children}
     </motion.div>
-  );
-}
-
-// ── LOADER ───────────────────────────────────────────────────────
-function Loader({ onComplete }) {
-  const [count, setCount] = useState(0);
-  const [exit, setExit] = useState(false);
-
-  useEffect(() => {
-    let current = 0;
-    const tick = () => {
-      current += Math.random() * 6 + 2;
-      if (current >= 100) {
-        setCount(100);
-        setTimeout(() => setExit(true), 400);
-      } else {
-        setCount(Math.floor(current));
-        setTimeout(tick, 16);
-      }
-    };
-    setTimeout(tick, 120);
-  }, []);
-
-  return (
-    <AnimatePresence onExitComplete={onComplete}>
-      {!exit && (
-        <motion.div
-          className="loader"
-          exit={{ y: "-100%" }}
-          transition={{ duration: 0.9, ease: [0.76, 0, 0.24, 1] }}
-        >
-          <motion.span
-            className="loader__count"
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-          >
-            {count}
-          </motion.span>
-        </motion.div>
-      )}
-    </AnimatePresence>
   );
 }
 
@@ -122,7 +83,7 @@ function AnimatedCounter({ value }) {
     const suffix = match[2] || "";
     const isDecimal = match[1].includes(".");
     const decimals = isDecimal ? match[1].split(".")[1].length : 0;
-    const duration = 1400;
+    const duration = 2200;
     const start = performance.now();
     const tick = (now) => {
       const p = Math.min((now - start) / duration, 1);
@@ -216,14 +177,152 @@ function SectionHeader({ label, title, style }) {
       >
         {label}
       </motion.span>
-      <motion.h2 className="section__title"
-        initial={{ opacity: 0, y: 36 }}
-        animate={inView ? { opacity: 1, y: 0 } : {}}
-        transition={{ duration: 0.65, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}
-      >
-        {title}
-      </motion.h2>
+      <div className="section__title-clip">
+        <motion.h2 className="section__title"
+          initial={{ clipPath: "inset(0 100% 0 0)" }}
+          animate={inView ? { clipPath: "inset(0 0% 0 0)" } : {}}
+          transition={{ duration: 0.85, delay: 0.1, ease: [0.76, 0, 0.24, 1] }}
+        >
+          {title}
+        </motion.h2>
+      </div>
     </div>
+  );
+}
+
+// ── PARTICLES ────────────────────────────────────────────────────
+function ParticlesBg() {
+  const canvasRef = useRef(null);
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext("2d");
+    let animId;
+    const resize = () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; };
+    resize();
+    window.addEventListener("resize", resize);
+    const pts = Array.from({ length: 55 }, () => ({
+      x: Math.random() * canvas.width, y: Math.random() * canvas.height,
+      r: Math.random() * 1.2 + 0.4,
+      vx: (Math.random() - 0.5) * 0.25, vy: (Math.random() - 0.5) * 0.25,
+      o: Math.random() * 0.35 + 0.1,
+    }));
+    const draw = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      pts.forEach(p => {
+        p.x += p.vx; p.y += p.vy;
+        if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
+        if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
+        ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255,107,53,${p.o})`; ctx.fill();
+      });
+      pts.forEach((a, i) => pts.slice(i + 1).forEach(b => {
+        const d = Math.hypot(a.x - b.x, a.y - b.y);
+        if (d < 130) {
+          ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y);
+          ctx.strokeStyle = `rgba(255,107,53,${0.07 * (1 - d / 130)})`; ctx.lineWidth = 0.5; ctx.stroke();
+        }
+      }));
+      animId = requestAnimationFrame(draw);
+    };
+    draw();
+    return () => { window.removeEventListener("resize", resize); cancelAnimationFrame(animId); };
+  }, []);
+  return <canvas ref={canvasRef} className="particles-canvas" />;
+}
+
+// ── THEME REVEAL ─────────────────────────────────────────────────
+function ThemeReveal({ x, y, targetDark, onComplete }) {
+  return (
+    <motion.div
+      className="theme-reveal"
+      style={{ background: targetDark ? "#0a0a0a" : "#ffffff" }}
+      initial={{ clipPath: `circle(0px at ${x}px ${y}px)` }}
+      animate={{ clipPath: `circle(200vmax at ${x}px ${y}px)` }}
+      transition={{ duration: 0.65, ease: [0.76, 0, 0.24, 1] }}
+      onAnimationComplete={onComplete}
+    />
+  );
+}
+
+// ── PROJECT MODAL ─────────────────────────────────────────────────
+function ProjectModal({ project, onClose, tr }) {
+  useEffect(() => {
+    const onKey = (e) => { if (e.key === "Escape") onClose(); };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
+  return (
+    <motion.div className="modal-backdrop" onClick={onClose}
+      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+      transition={{ duration: 0.25 }}
+    >
+      <motion.div
+        className="modal"
+        layoutId={`card-${project.id}`}
+        onClick={e => e.stopPropagation()}
+        style={{ "--card-color": project.color }}
+      >
+        <button className="modal__close" onClick={onClose}>✕</button>
+        <div className="modal__top">
+          <div>
+            <div className="modal__name">{project.name}</div>
+            <div className="project-card__tagline">{tr(project.tagline)}</div>
+          </div>
+          <div className="project-card__tags">
+            {project.tags.map(tag => <span key={tag} className="project-card__tag">{tag}</span>)}
+          </div>
+        </div>
+        <p className="modal__desc">{tr(project.description)}</p>
+        {project.stats && (
+          <div className="project-card__stats">
+            {project.stats.map(s => (
+              <div key={s.label} className="project-card__stat">
+                <div className="project-card__stat-val"><AnimatedCounter value={s.value} /></div>
+                <div className="project-card__stat-label">{s.label}</div>
+              </div>
+            ))}
+          </div>
+        )}
+        {project.link && (
+          <a href={project.link} target="_blank" rel="noreferrer" className="btn btn--primary modal__link">
+            View project ↗
+          </a>
+        )}
+      </motion.div>
+    </motion.div>
+  );
+}
+
+// ── TESTIMONIALS ──────────────────────────────────────────────────
+const duplicatedTestimonials = [...testimonials, ...testimonials];
+
+function Testimonials({ tr }) {
+  return (
+    <section className="section">
+      <div className="container">
+        <SectionHeader label="06" title={tr(t.sections.testimonials)} />
+      </div>
+      <div className="testimonials__track-wrap">
+        <div className="testimonials__track">
+          {duplicatedTestimonials.map((item, i) => (
+            <div key={`${item.id}-${i}`} className="testimonial__card">
+              <div className="testimonial__stars">
+                {"★".repeat(item.rating)}
+              </div>
+              <p className="testimonial__text">"{tr(item.text)}"</p>
+              <div className="testimonial__author">
+                <div className="testimonial__avatar">{item.avatar}</div>
+                <div>
+                  <div className="testimonial__name">{item.name}</div>
+                  <div className="testimonial__role">{item.role} · {item.company}</div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
   );
 }
 
@@ -267,9 +366,22 @@ function Nav({ lang, setLang, dark, setDark, tr }) {
             </button>
           ))}
         </div>
-        <button className="theme-btn" onClick={() => setDark(!dark)} aria-label="Toggle theme">
-          {dark ? "☀" : "☾"}
-        </button>
+        <motion.button
+          className="theme-btn"
+          onClick={() => setDark(!dark)}
+          aria-label="Toggle theme"
+          whileTap={{ scale: 0.85 }}
+        >
+          <motion.span
+            key={dark ? "sun" : "moon"}
+            initial={{ rotate: -90, opacity: 0, scale: 0.5 }}
+            animate={{ rotate: 0, opacity: 1, scale: 1 }}
+            exit={{ rotate: 90, opacity: 0, scale: 0.5 }}
+            transition={{ duration: 0.3 }}
+          >
+            {dark ? "☀" : "☾"}
+          </motion.span>
+        </motion.button>
       </div>
     </motion.nav>
   );
@@ -283,6 +395,7 @@ function Hero({ tr, loaderDone }) {
 
   return (
     <section id="top" className="hero">
+      <ParticlesBg />
       <div className="container hero__layout">
         <motion.div
           className="hero__photo-wrap"
@@ -310,14 +423,16 @@ function Hero({ tr, loaderDone }) {
             {tr(t.hero.available)}
           </motion.div>
 
-          <motion.h1
-            className="hero__name"
-            initial={{ opacity: 0, y: 40 }}
-            animate={loaderDone ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.7, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
-          >
-            <ScrambleText text={config.name} trigger={loaderDone} />
-          </motion.h1>
+          <div className="hero__name-clip">
+            <motion.h1
+              className="hero__name"
+              initial={{ clipPath: "inset(0 100% 0 0)" }}
+              animate={{ clipPath: "inset(0 0% 0 0)" }}
+              transition={{ duration: 0.85, delay: 0.1, ease: [0.76, 0, 0.24, 1] }}
+            >
+              {config.name}
+            </motion.h1>
+          </div>
 
           <motion.p
             className="hero__title"
@@ -325,7 +440,13 @@ function Hero({ tr, loaderDone }) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.9, duration: 0.7 }}
           >
-            {tr(config.title)}
+            <TypeAnimation
+              sequence={config.typewriterPhrases.flatMap(p => [p, 2200])}
+              wrapper="span"
+              speed={60}
+              deletionSpeed={80}
+              repeat={Infinity}
+            />
           </motion.p>
 
           <motion.p
@@ -349,6 +470,9 @@ function Hero({ tr, loaderDone }) {
             <a href="#projects" className="btn btn--outline">
               {tr(t.hero.cta_projects)}
             </a>
+            <a href={config.cv} download="Samuel_Reka_CV.pdf" className="btn btn--outline">
+              {tr(t.hero.cta_cv)} ↓
+            </a>
           </motion.div>
         </motion.div>
       </div>
@@ -366,30 +490,50 @@ function Hero({ tr, loaderDone }) {
   );
 }
 
+// ── SKILL BUBBLE ─────────────────────────────────────────────────
+const FLOAT_PARAMS = [
+  { y: [0, -14, 0], dur: 3.2 }, { y: [0, -8, 0],  dur: 2.7 },
+  { y: [0, -18, 0], dur: 3.8 }, { y: [0, -10, 0], dur: 2.4 },
+  { y: [0, -12, 0], dur: 3.5 }, { y: [0, -16, 0], dur: 2.9 },
+  { y: [0, -9, 0],  dur: 3.1 }, { y: [0, -13, 0], dur: 2.6 },
+];
+
+function SkillBubble({ skill, index }) {
+  const { y, dur } = FLOAT_PARAMS[index % FLOAT_PARAMS.length];
+  const delay = (index * 0.18) % 2;
+  const t = (skill.level - 65) / 35;
+  const fontSize = `${13 + t * 11}px`;
+  const px = `${16 + t * 16}px`;
+  const py = `${9 + t * 8}px`;
+
+  return (
+    <motion.div
+      variants={staggerItemUp}
+      style={{ "--lvl": skill.level }}
+    >
+      <motion.div
+        className="skill__bubble"
+        style={{ fontSize, padding: `${py} ${px}` }}
+        animate={{ y }}
+        transition={{ duration: dur, repeat: Infinity, ease: "easeInOut", delay }}
+        whileHover={{ scale: 1.12, y: -16 }}
+      >
+        <span className="skill__bubble-name">{skill.name}</span>
+        <span className="skill__bubble-level">{skill.level}%</span>
+      </motion.div>
+    </motion.div>
+  );
+}
+
 // ── SKILLS ───────────────────────────────────────────────────────
 function Skills({ tr }) {
   return (
     <section id="about" className="section">
       <div className="container">
         <SectionHeader label="02" title={tr(t.sections.skills)} />
-
-        <StaggerReveal className="skills__grid">
+        <StaggerReveal className="skills__bubbles">
           {skills.map((skill, i) => (
-            <motion.div key={skill.name} variants={staggerItemUp} className="skill__item">
-              <div className="skill__top">
-                <span className="skill__name">{skill.name}</span>
-                <span className="skill__pct">{skill.level}%</span>
-              </div>
-              <div className="skill__bar">
-                <motion.div
-                  className="skill__fill"
-                  initial={{ width: 0 }}
-                  whileInView={{ width: `${skill.level}%` }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 1.2, delay: i * 0.06, ease: [0.22, 1, 0.36, 1] }}
-                />
-              </div>
-            </motion.div>
+            <SkillBubble key={skill.name} skill={skill} index={i} />
           ))}
         </StaggerReveal>
       </div>
@@ -398,7 +542,7 @@ function Skills({ tr }) {
 }
 
 // ── PROJECT CARD ─────────────────────────────────────────────────
-function ProjectCard({ project, tr }) {
+function ProjectCard({ project, tr, onOpen }) {
   const [hovered, setHovered] = useState(false);
   const cardRef = useRef(null);
   const rotX = useMotionValue(0);
@@ -427,6 +571,7 @@ function ProjectCard({ project, tr }) {
   return (
     <motion.div
       ref={cardRef}
+      layoutId={`card-${project.id}`}
       variants={staggerItemUp}
       className="project-card"
       style={{ "--card-color": project.color, "--card-bg": project.bg, rotateX: springRotX, rotateY: springRotY, transformPerspective: 1000 }}
@@ -434,6 +579,7 @@ function ProjectCard({ project, tr }) {
       onMouseLeave={onMouseLeave}
       onHoverStart={() => setHovered(true)}
       onHoverEnd={() => setHovered(false)}
+      onClick={onOpen}
       whileHover={{ y: -8 }}
       transition={{ duration: 0.3 }}
     >
@@ -489,17 +635,20 @@ function ProjectCard({ project, tr }) {
 
 // ── PROJECTS ─────────────────────────────────────────────────────
 function Projects({ tr }) {
+  const [selected, setSelected] = useState(null);
   return (
     <section id="projects" className="section section--alt">
       <div className="container">
         <SectionHeader label="03" title={tr(t.sections.projects)} />
-
         <StaggerReveal className="projects__grid">
           {projects.map((p) => (
-            <ProjectCard key={p.id} project={p} tr={tr} />
+            <ProjectCard key={p.id} project={p} tr={tr} onOpen={() => setSelected(p)} />
           ))}
         </StaggerReveal>
       </div>
+      <AnimatePresence>
+        {selected && <ProjectModal project={selected} onClose={() => setSelected(null)} tr={tr} />}
+      </AnimatePresence>
     </section>
   );
 }
@@ -570,14 +719,31 @@ function Contact({ tr }) {
 
         <FadeIn delay={0.2}>
           <div className="contact__links">
-            <a href={`mailto:${config.email}`} className="btn btn--primary">
+            <a
+              href={`mailto:${config.email}`}
+              className="btn btn--primary"
+              onClick={() => toast(tr(t.contact.toast_email), { icon: "✉️" })}
+            >
               {tr(t.contact.email)} ↗
             </a>
-            <a href={config.links.fiverr} target="_blank" rel="noreferrer" className="btn btn--outline">
+            <a
+              href={config.links.fiverr} target="_blank" rel="noreferrer"
+              className="btn btn--outline"
+              onClick={() => toast(tr(t.contact.toast_fiverr), { icon: "🚀" })}
+            >
               Fiverr ↗
             </a>
-            <a href={config.links.linkedin} target="_blank" rel="noreferrer" className="btn btn--outline">
+            <a
+              href={config.links.linkedin} target="_blank" rel="noreferrer"
+              className="btn btn--outline"
+              onClick={() => toast(tr(t.contact.toast_linkedin), { icon: "💼" })}
+            >
               LinkedIn ↗
+            </a>
+            <a href={config.cv} download="Samuel_Reka_CV.pdf" className="btn btn--outline"
+              onClick={() => toast("Downloading CV... ↓", { icon: "📄" })}
+            >
+              {tr(t.hero.cta_cv)} ↓
             </a>
           </div>
         </FadeIn>
@@ -610,25 +776,24 @@ function Footer() {
 export default function App() {
   const { lang, setLang, tr } = useLang();
   const { dark, setDark } = useTheme();
-  const [loaderDone, setLoaderDone] = useState(false);
 
   useEffect(() => {
-    if (!loaderDone) return;
     const lenis = new Lenis({ lerp: 0.08, smoothWheel: true });
     const raf = (time) => { lenis.raf(time); requestAnimationFrame(raf); };
     requestAnimationFrame(raf);
     return () => lenis.destroy();
-  }, [loaderDone]);
+  }, []);
 
   return (
     <div className="app">
-      <Loader onComplete={() => setLoaderDone(true)} />
+      <Toaster position="bottom-right" toastOptions={{ style: { background: "var(--bg-card)", color: "var(--text)", border: "1px solid var(--border)" }, duration: 2000 }} />
       <MagneticCursor />
       <Nav lang={lang} setLang={setLang} dark={dark} setDark={setDark} tr={tr} />
-      <Hero tr={tr} loaderDone={loaderDone} />
+      <Hero tr={tr} loaderDone={true} />
       <Skills tr={tr} />
       <Projects tr={tr} />
       <Experience tr={tr} />
+      <Testimonials tr={tr} />
       <Contact tr={tr} />
       <Footer />
     </div>
