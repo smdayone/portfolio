@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
-import { motion, useInView, useScroll, useTransform, useSpring, useMotionValue, AnimatePresence } from "framer-motion";
+import { motion, useInView, useScroll, useTransform, useSpring, useMotionValue, useMotionTemplate, AnimatePresence } from "framer-motion";
+import Lenis from "lenis";
 import { config, colors, skills, projects, experience, education, t } from "./data";
 import "./index.css";
 
@@ -34,6 +35,107 @@ function FadeIn({ children, delay = 0, y = 30, className = "" }) {
       {children}
     </motion.div>
   );
+}
+
+// ── LOADER ───────────────────────────────────────────────────────
+function Loader({ onComplete }) {
+  const [count, setCount] = useState(0);
+  const [exit, setExit] = useState(false);
+
+  useEffect(() => {
+    let current = 0;
+    const tick = () => {
+      current += Math.random() * 6 + 2;
+      if (current >= 100) {
+        setCount(100);
+        setTimeout(() => setExit(true), 400);
+      } else {
+        setCount(Math.floor(current));
+        setTimeout(tick, 16);
+      }
+    };
+    setTimeout(tick, 120);
+  }, []);
+
+  return (
+    <AnimatePresence onExitComplete={onComplete}>
+      {!exit && (
+        <motion.div
+          className="loader"
+          exit={{ y: "-100%" }}
+          transition={{ duration: 0.9, ease: [0.76, 0, 0.24, 1] }}
+        >
+          <motion.span
+            className="loader__count"
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            {count}
+          </motion.span>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
+
+// ── SCRAMBLE TEXT ────────────────────────────────────────────────
+const SCRAMBLE_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%&";
+
+function ScrambleText({ text, trigger }) {
+  const [display, setDisplay] = useState(
+    () => text.split("").map(c => c === " " ? " " : SCRAMBLE_CHARS[Math.floor(Math.random() * SCRAMBLE_CHARS.length)]).join("")
+  );
+
+  useEffect(() => {
+    if (!trigger) return;
+    let frame = 0;
+    const total = text.length + 18;
+    const animate = () => {
+      setDisplay(
+        text.split("").map((char, i) => {
+          if (char === " ") return " ";
+          if (frame > (i / text.length) * (total - 12)) return char;
+          return SCRAMBLE_CHARS[Math.floor(Math.random() * SCRAMBLE_CHARS.length)];
+        }).join("")
+      );
+      frame++;
+      if (frame < total) requestAnimationFrame(animate);
+      else setDisplay(text);
+    };
+    requestAnimationFrame(animate);
+  }, [trigger, text]);
+
+  return <>{display}</>;
+}
+
+// ── ANIMATED COUNTER ─────────────────────────────────────────────
+function AnimatedCounter({ value }) {
+  const ref = useRef(null);
+  const inView = useInView(ref, { once: true });
+  const [display, setDisplay] = useState("0");
+
+  useEffect(() => {
+    if (!inView) return;
+    const match = value.match(/^([\d.]+)(.*)$/);
+    if (!match) { setDisplay(value); return; }
+    const num = parseFloat(match[1]);
+    const suffix = match[2] || "";
+    const isDecimal = match[1].includes(".");
+    const decimals = isDecimal ? match[1].split(".")[1].length : 0;
+    const duration = 1400;
+    const start = performance.now();
+    const tick = (now) => {
+      const p = Math.min((now - start) / duration, 1);
+      const eased = 1 - Math.pow(1 - p, 3);
+      const cur = eased * num;
+      setDisplay((isDecimal ? cur.toFixed(decimals) : Math.floor(cur)) + suffix);
+      if (p < 1) requestAnimationFrame(tick);
+      else setDisplay(value);
+    };
+    requestAnimationFrame(tick);
+  }, [inView, value]);
+
+  return <span ref={ref}>{display}</span>;
 }
 
 // ── MAGNETIC CURSOR ──────────────────────────────────────────────
@@ -174,12 +276,10 @@ function Nav({ lang, setLang, dark, setDark, tr }) {
 }
 
 // ── HERO ─────────────────────────────────────────────────────────
-function Hero({ tr }) {
+function Hero({ tr, loaderDone }) {
   const { scrollY } = useScroll();
   const y = useTransform(scrollY, [0, 500], [0, 80]);
   const opacity = useTransform(scrollY, [0, 400], [1, 0]);
-
-  const letters = config.name.split("");
 
   return (
     <section id="top" className="hero">
@@ -210,19 +310,14 @@ function Hero({ tr }) {
             {tr(t.hero.available)}
           </motion.div>
 
-          <h1 className="hero__name">
-            {letters.map((char, i) => (
-              <motion.span
-                key={i}
-                initial={{ opacity: 0, y: 60 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 + i * 0.04, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-                className={char === " " ? "hero__name-space" : ""}
-              >
-                {char}
-              </motion.span>
-            ))}
-          </h1>
+          <motion.h1
+            className="hero__name"
+            initial={{ opacity: 0, y: 40 }}
+            animate={loaderDone ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.7, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <ScrambleText text={config.name} trigger={loaderDone} />
+          </motion.h1>
 
           <motion.p
             className="hero__title"
@@ -305,60 +400,90 @@ function Skills({ tr }) {
 // ── PROJECT CARD ─────────────────────────────────────────────────
 function ProjectCard({ project, tr }) {
   const [hovered, setHovered] = useState(false);
+  const cardRef = useRef(null);
+  const rotX = useMotionValue(0);
+  const rotY = useMotionValue(0);
+  const glowX = useMotionValue(50);
+  const glowY = useMotionValue(50);
+  const springRotX = useSpring(rotX, { stiffness: 200, damping: 25 });
+  const springRotY = useSpring(rotY, { stiffness: 200, damping: 25 });
+  const glowBg = useMotionTemplate`radial-gradient(circle at ${glowX}% ${glowY}%, ${project.color}28 0%, transparent 65%)`;
+
+  const onMouseMove = (e) => {
+    const rect = cardRef.current.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width;
+    const y = (e.clientY - rect.top) / rect.height;
+    rotY.set((x - 0.5) * 14);
+    rotX.set((0.5 - y) * 14);
+    glowX.set(x * 100);
+    glowY.set(y * 100);
+  };
+
+  const onMouseLeave = () => {
+    rotX.set(0); rotY.set(0);
+    glowX.set(50); glowY.set(50);
+  };
 
   return (
     <motion.div
+      ref={cardRef}
       variants={staggerItemUp}
       className="project-card"
-        style={{ "--card-color": project.color, "--card-bg": project.bg }}
-        onHoverStart={() => setHovered(true)}
-        onHoverEnd={() => setHovered(false)}
-        whileHover={{ y: -6 }}
-        transition={{ duration: 0.3 }}
-      >
-        <div className="project-card__header">
-          <div className="project-card__name">{project.name}</div>
-          <div className="project-card__tags">
-            {project.tags.slice(0, 3).map((tag) => (
-              <span key={tag} className="project-card__tag">{tag}</span>
-            ))}
-          </div>
+      style={{ "--card-color": project.color, "--card-bg": project.bg, rotateX: springRotX, rotateY: springRotY, transformPerspective: 1000 }}
+      onMouseMove={onMouseMove}
+      onMouseLeave={onMouseLeave}
+      onHoverStart={() => setHovered(true)}
+      onHoverEnd={() => setHovered(false)}
+      whileHover={{ y: -8 }}
+      transition={{ duration: 0.3 }}
+    >
+      <motion.div className="project-card__glow" style={{ background: glowBg }} />
+
+      <div className="project-card__header">
+        <div className="project-card__name">{project.name}</div>
+        <div className="project-card__tags">
+          {project.tags.slice(0, 3).map((tag) => (
+            <span key={tag} className="project-card__tag">{tag}</span>
+          ))}
         </div>
+      </div>
 
-        <div className="project-card__tagline">{tr(project.tagline)}</div>
+      <div className="project-card__tagline">{tr(project.tagline)}</div>
 
-        <p className="project-card__desc">{tr(project.description)}</p>
+      <p className="project-card__desc">{tr(project.description)}</p>
 
-        {project.stats && (
-          <div className="project-card__stats">
-            {project.stats.map((s) => (
-              <div key={s.label} className="project-card__stat">
-                <div className="project-card__stat-val">{s.value}</div>
-                <div className="project-card__stat-label">{s.label}</div>
+      {project.stats && (
+        <div className="project-card__stats">
+          {project.stats.map((s) => (
+            <div key={s.label} className="project-card__stat">
+              <div className="project-card__stat-val">
+                <AnimatedCounter value={s.value} />
               </div>
-            ))}
-          </div>
-        )}
+              <div className="project-card__stat-label">{s.label}</div>
+            </div>
+          ))}
+        </div>
+      )}
 
-        {project.link && (
-          <motion.a
-            href={project.link}
-            target="_blank"
-            rel="noreferrer"
-            className="project-card__link"
-            animate={{ opacity: hovered ? 1 : 0, y: hovered ? 0 : 8 }}
-            transition={{ duration: 0.2 }}
-          >
-            View ↗
-          </motion.a>
-        )}
+      {project.link && (
+        <motion.a
+          href={project.link}
+          target="_blank"
+          rel="noreferrer"
+          className="project-card__link"
+          animate={{ opacity: hovered ? 1 : 0, y: hovered ? 0 : 8 }}
+          transition={{ duration: 0.2 }}
+        >
+          View ↗
+        </motion.a>
+      )}
 
-        <motion.div
-          className="project-card__accent"
-          animate={{ opacity: hovered ? 1 : 0, scale: hovered ? 1 : 0.8 }}
-          transition={{ duration: 0.4 }}
-        />
-      </motion.div>
+      <motion.div
+        className="project-card__accent"
+        animate={{ opacity: hovered ? 1 : 0, scale: hovered ? 1 : 0.8 }}
+        transition={{ duration: 0.4 }}
+      />
+    </motion.div>
   );
 }
 
@@ -485,12 +610,22 @@ function Footer() {
 export default function App() {
   const { lang, setLang, tr } = useLang();
   const { dark, setDark } = useTheme();
+  const [loaderDone, setLoaderDone] = useState(false);
+
+  useEffect(() => {
+    if (!loaderDone) return;
+    const lenis = new Lenis({ lerp: 0.08, smoothWheel: true });
+    const raf = (time) => { lenis.raf(time); requestAnimationFrame(raf); };
+    requestAnimationFrame(raf);
+    return () => lenis.destroy();
+  }, [loaderDone]);
 
   return (
     <div className="app">
+      <Loader onComplete={() => setLoaderDone(true)} />
       <MagneticCursor />
       <Nav lang={lang} setLang={setLang} dark={dark} setDark={setDark} tr={tr} />
-      <Hero tr={tr} />
+      <Hero tr={tr} loaderDone={loaderDone} />
       <Skills tr={tr} />
       <Projects tr={tr} />
       <Experience tr={tr} />

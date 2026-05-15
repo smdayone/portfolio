@@ -32,6 +32,27 @@
   --shadow-hover: 0 8px 40px rgba(0,0,0,0.5);
 }
 
+/* ── LOADER ────────────────────────────────────────────────────── */
+.loader {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: var(--bg);
+  display: flex;
+  align-items: flex-end;
+  padding: 48px;
+  pointer-events: none;
+}
+
+.loader__count {
+  font-size: clamp(80px, 18vw, 200px);
+  font-weight: 800;
+  letter-spacing: -0.06em;
+  line-height: 1;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
 /* ── CURSOR ────────────────────────────────────────────────────── */
 @media (pointer: fine) {
   * { cursor: none !important; }
@@ -488,6 +509,20 @@ img { max-width: 100%; display: block; }
 .project-card:hover {
   border-color: var(--border-hover);
   box-shadow: var(--shadow-hover);
+}
+
+.project-card__glow {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius);
+  pointer-events: none;
+  z-index: 0;
+  transition: opacity 0.3s;
+}
+
+.project-card > *:not(.project-card__glow):not(.project-card__accent) {
+  position: relative;
+  z-index: 1;
 }
 
 .project-card::before {
