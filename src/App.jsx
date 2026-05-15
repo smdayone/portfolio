@@ -94,78 +94,80 @@ function Hero({ tr }) {
 
   return (
     <section id="top" className="hero">
-      <motion.div className="hero__inner" style={{ y, opacity }}>
+      <div className="container hero__layout">
         <motion.div
-          className="hero__available"
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.2, duration: 0.6 }}
+          className="hero__photo-wrap"
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.5, duration: 1, ease: [0.22, 1, 0.36, 1] }}
         >
-          <span className="hero__dot" />
-          {tr(t.hero.available)}
+          <div className="hero__photo-frame">
+            <img src={config.photo} alt={config.name} className="hero__photo" />
+            <div className="hero__photo-overlay" />
+          </div>
+          <div className="hero__photo-tag">
+            <span>{config.location}</span>
+          </div>
         </motion.div>
 
-        <h1 className="hero__name">
-          {letters.map((char, i) => (
-            <motion.span
-              key={i}
-              initial={{ opacity: 0, y: 60 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 + i * 0.04, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-              className={char === " " ? "hero__name-space" : ""}
-            >
-              {char}
-            </motion.span>
-          ))}
-        </h1>
+        <motion.div className="hero__inner" style={{ y, opacity }}>
+          <motion.div
+            className="hero__available"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.2, duration: 0.6 }}
+          >
+            <span className="hero__dot" />
+            {tr(t.hero.available)}
+          </motion.div>
 
-        <motion.p
-          className="hero__title"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.9, duration: 0.7 }}
-        >
-          {tr(config.title)}
-        </motion.p>
+          <h1 className="hero__name">
+            {letters.map((char, i) => (
+              <motion.span
+                key={i}
+                initial={{ opacity: 0, y: 60 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 + i * 0.04, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+                className={char === " " ? "hero__name-space" : ""}
+              >
+                {char}
+              </motion.span>
+            ))}
+          </h1>
 
-        <motion.p
-          className="hero__tagline"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1.1, duration: 0.8 }}
-        >
-          {tr(config.tagline)}
-        </motion.p>
+          <motion.p
+            className="hero__title"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.9, duration: 0.7 }}
+          >
+            {tr(config.title)}
+          </motion.p>
 
-        <motion.div
-          className="hero__ctas"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1.3, duration: 0.6 }}
-        >
-          <a href={config.links.fiverr} target="_blank" rel="noreferrer" className="btn btn--primary">
-            {tr(t.hero.cta_fiverr)} ↗
-          </a>
-          <a href="#projects" className="btn btn--outline">
-            {tr(t.hero.cta_projects)}
-          </a>
+          <motion.p
+            className="hero__tagline"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 1.1, duration: 0.8 }}
+          >
+            {tr(config.tagline)}
+          </motion.p>
+
+          <motion.div
+            className="hero__ctas"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1.3, duration: 0.6 }}
+          >
+            <a href={config.links.fiverr} target="_blank" rel="noreferrer" className="btn btn--primary">
+              {tr(t.hero.cta_fiverr)} ↗
+            </a>
+            <a href="#projects" className="btn btn--outline">
+              {tr(t.hero.cta_projects)}
+            </a>
+          </motion.div>
         </motion.div>
-      </motion.div>
-
-      <motion.div
-        className="hero__photo-wrap"
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ delay: 0.5, duration: 1, ease: [0.22, 1, 0.36, 1] }}
-      >
-        <div className="hero__photo-frame">
-          <img src={config.photo} alt={config.name} className="hero__photo" />
-          <div className="hero__photo-overlay" />
-        </div>
-        <div className="hero__photo-tag">
-          <span>{config.location}</span>
-        </div>
-      </motion.div>
+      </div>
 
       <motion.div
         className="hero__scroll"
