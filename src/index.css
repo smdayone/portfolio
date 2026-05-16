@@ -635,33 +635,53 @@ img { max-width: 100%; display: block; }
 .timeline {
   display: flex;
   flex-direction: column;
-  gap: 0;
+  gap: 16px;
   position: relative;
 }
 
+/* Gray background track */
 .timeline::before {
   content: '';
   position: absolute;
   left: 7px; top: 0; bottom: 0;
   width: 1px;
   background: var(--border);
+  z-index: 0;
+}
+
+/* Scroll-driven orange progress line */
+.timeline__progress {
+  position: absolute;
+  left: 7px; top: 0; bottom: 0;
+  width: 1px;
+  background: var(--highlight);
+  transform-origin: top;
+  z-index: 1;
+  border-radius: 1px;
+  box-shadow: 0 0 8px rgba(255,107,53,0.4);
 }
 
 .timeline__item {
   display: flex;
-  gap: 32px;
-  padding-bottom: 40px;
+  gap: 28px;
   position: relative;
 }
 
 .timeline__dot {
   width: 15px; height: 15px;
   border-radius: 50%;
-  background: var(--text);
+  background: var(--text-3);
   flex-shrink: 0;
-  margin-top: 4px;
+  margin-top: 22px;
   position: relative;
-  z-index: 1;
+  z-index: 2;
+  transition: background 0.4s ease, box-shadow 0.4s ease, transform 0.4s ease;
+}
+
+.timeline__item--active .timeline__dot {
+  background: var(--highlight);
+  box-shadow: 0 0 0 4px rgba(255,107,53,0.18), 0 0 18px rgba(255,107,53,0.3);
+  transform: scale(1.25);
 }
 
 .timeline__dot-pulse {
@@ -677,7 +697,36 @@ img { max-width: 100%; display: block; }
   50% { opacity: 0.4; transform: scale(1.3); }
 }
 
-.timeline__content { flex: 1; }
+/* Glassmorphism card */
+.timeline__card {
+  flex: 1;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px 28px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+
+.timeline__card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 25% 50%, rgba(255,107,53,0.06), transparent 65%);
+  opacity: 0;
+  transition: opacity 0.45s ease;
+  pointer-events: none;
+}
+
+.timeline__item--active .timeline__card {
+  border-color: rgba(255,107,53,0.22);
+  box-shadow: 0 4px 32px rgba(255,107,53,0.08);
+}
+
+.timeline__item--active .timeline__card::after {
+  opacity: 1;
+}
 
 .timeline__top {
   display: flex;
@@ -692,6 +741,7 @@ img { max-width: 100%; display: block; }
   font-weight: 700;
   color: var(--text);
   letter-spacing: -0.01em;
+  transition: color var(--transition);
 }
 
 .timeline__company {
@@ -1029,6 +1079,9 @@ img { max-width: 100%; display: block; }
   .projects__grid { grid-template-columns: 1fr; }
 
   .timeline__top { flex-direction: column; }
+  .timeline__card { padding: 16px 20px; }
+  .timeline__dot { margin-top: 18px; }
+  .timeline__item { gap: 20px; }
 
   .footer__inner { flex-direction: column; gap: 8px; text-align: center; }
 }

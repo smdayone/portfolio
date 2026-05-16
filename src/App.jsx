@@ -653,55 +653,73 @@ function Projects({ tr }) {
   );
 }
 
+// ── TIMELINE ITEM ────────────────────────────────────────────────
+function TimelineItem({ item, tr, isEducation }) {
+  const ref = useRef(null);
+  const inView = useInView(ref, { once: true, margin: "-60px" });
+  const isActive = useInView(ref, { once: false, margin: "-38% 0px -38% 0px" });
+
+  return (
+    <motion.div
+      ref={ref}
+      className={`timeline__item${isActive ? " timeline__item--active" : ""}`}
+      initial={{ opacity: 0, x: -40 }}
+      animate={inView ? { opacity: 1, x: 0 } : {}}
+      transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
+    >
+      <div className="timeline__dot">
+        {item.current && <div className="timeline__dot-pulse" />}
+      </div>
+      <div className="timeline__card">
+        <div className="timeline__top">
+          <div>
+            <div className="timeline__role">
+              {tr(isEducation ? item.title : item.role)}
+            </div>
+            <div className="timeline__company">
+              {isEducation ? item.institution : item.company}
+            </div>
+          </div>
+          <div className="timeline__period">
+            {item.current && <span className="timeline__current">Now</span>}
+            {item.period}
+          </div>
+        </div>
+        <p className="timeline__desc">{tr(item.description)}</p>
+      </div>
+    </motion.div>
+  );
+}
+
+// ── TIMELINE SECTION ─────────────────────────────────────────────
+function TimelineSection({ items, tr, isEducation = false }) {
+  const ref = useRef(null);
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start 0.85", "end 0.15"],
+  });
+  const lineScaleY = useSpring(scrollYProgress, { stiffness: 80, damping: 30, restDelta: 0.001 });
+
+  return (
+    <div className="timeline" ref={ref}>
+      <motion.div className="timeline__progress" style={{ scaleY: lineScaleY }} />
+      {items.map((item, i) => (
+        <TimelineItem key={i} item={item} tr={tr} isEducation={isEducation} />
+      ))}
+    </div>
+  );
+}
+
 // ── EXPERIENCE ───────────────────────────────────────────────────
 function Experience({ tr }) {
   return (
     <section id="experience" className="section">
       <div className="container">
         <SectionHeader label="04" title={tr(t.sections.experience)} />
-
-        <StaggerReveal className="timeline">
-          {experience.map((exp, i) => (
-            <motion.div key={i} variants={staggerItemLeft} className="timeline__item">
-              <div className="timeline__dot">
-                {exp.current && <div className="timeline__dot-pulse" />}
-              </div>
-              <div className="timeline__content">
-                <div className="timeline__top">
-                  <div>
-                    <div className="timeline__role">{tr(exp.role)}</div>
-                    <div className="timeline__company">{exp.company}</div>
-                  </div>
-                  <div className="timeline__period">
-                    {exp.current && <span className="timeline__current">Now</span>}
-                    {exp.period}
-                  </div>
-                </div>
-                <p className="timeline__desc">{tr(exp.description)}</p>
-              </div>
-            </motion.div>
-          ))}
-        </StaggerReveal>
+        <TimelineSection items={experience} tr={tr} />
 
         <SectionHeader label="05" title={tr(t.sections.education)} style={{ marginTop: "5rem" }} />
-
-        <StaggerReveal className="timeline">
-          {education.map((edu, i) => (
-            <motion.div key={i} variants={staggerItemLeft} className="timeline__item">
-              <div className="timeline__dot" />
-              <div className="timeline__content">
-                <div className="timeline__top">
-                  <div>
-                    <div className="timeline__role">{tr(edu.title)}</div>
-                    <div className="timeline__company">{edu.institution}</div>
-                  </div>
-                  <div className="timeline__period">{edu.period}</div>
-                </div>
-                <p className="timeline__desc">{tr(edu.description)}</p>
-              </div>
-            </motion.div>
-          ))}
-        </StaggerReveal>
+        <TimelineSection items={education} tr={tr} isEducation />
       </div>
     </section>
   );
