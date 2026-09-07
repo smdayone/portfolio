@@ -77,7 +77,7 @@ export const projects = [
     ],
     color: "#10B981",
     bg: "#061410",
-    link: null,
+    link: "https://www.instagram.com/youscaleit/",
   },
   {
     id: "viralify",
