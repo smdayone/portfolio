@@ -1,7 +1,8 @@
-import React, { useState, useEffect, useRef } from "react";
-import { motion, useInView, useScroll, useTransform, useSpring, useMotionValue, useMotionTemplate, AnimatePresence } from "framer-motion";
+import React, { useState, useEffect, useRef, useCallback } from "react";
+import { motion, useInView, useScroll, useTransform, useSpring, useMotionValue, AnimatePresence } from "framer-motion";
 import Lenis from "lenis";
-import { config, colors, skills, projects, experience, education, testimonials, t } from "./data";
+import { config, skills, projects, experience, education, testimonials, t } from "./data";
+import { media } from "./media";
 import { TypeAnimation } from "react-type-animation";
 import toast, { Toaster } from "react-hot-toast";
 import "./index.css";
@@ -37,36 +38,6 @@ function FadeIn({ children, delay = 0, y = 30, className = "" }) {
       {children}
     </motion.div>
   );
-}
-
-// ── SCRAMBLE TEXT ────────────────────────────────────────────────
-const SCRAMBLE_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%&";
-
-function ScrambleText({ text, trigger }) {
-  const [display, setDisplay] = useState(
-    () => text.split("").map(c => c === " " ? " " : SCRAMBLE_CHARS[Math.floor(Math.random() * SCRAMBLE_CHARS.length)]).join("")
-  );
-
-  useEffect(() => {
-    if (!trigger) return;
-    let frame = 0;
-    const total = text.length + 18;
-    const animate = () => {
-      setDisplay(
-        text.split("").map((char, i) => {
-          if (char === " ") return " ";
-          if (frame > (i / text.length) * (total - 12)) return char;
-          return SCRAMBLE_CHARS[Math.floor(Math.random() * SCRAMBLE_CHARS.length)];
-        }).join("")
-      );
-      frame++;
-      if (frame < total) requestAnimationFrame(animate);
-      else setDisplay(text);
-    };
-    requestAnimationFrame(animate);
-  }, [trigger, text]);
-
-  return <>{display}</>;
 }
 
 // ── ANIMATED COUNTER ─────────────────────────────────────────────
@@ -105,15 +76,13 @@ function MagneticCursor() {
   const my = useMotionValue(-100);
   const [variant, setVariant] = useState("default");
 
-  const dotX = useSpring(mx, { stiffness: 600, damping: 40 });
-  const dotY = useSpring(my, { stiffness: 600, damping: 40 });
-  const ringX = useSpring(mx, { stiffness: 140, damping: 18 });
-  const ringY = useSpring(my, { stiffness: 140, damping: 18 });
+  const ringX = useSpring(mx, { stiffness: 450, damping: 34, mass: 0.6 });
+  const ringY = useSpring(my, { stiffness: 450, damping: 34, mass: 0.6 });
 
   useEffect(() => {
     const move = (e) => { mx.set(e.clientX); my.set(e.clientY); };
-    const over = (e) => { if (e.target.closest("a, button")) setVariant("hover"); };
-    const out  = (e) => { if (e.target.closest("a, button")) setVariant("default"); };
+    const over = (e) => { if (e.target.closest("a, button, .project-card")) setVariant("hover"); };
+    const out  = (e) => { if (e.target.closest("a, button, .project-card")) setVariant("default"); };
     window.addEventListener("mousemove", move);
     document.addEventListener("mouseover", over);
     document.addEventListener("mouseout", out);
@@ -126,7 +95,7 @@ function MagneticCursor() {
 
   return (
     <>
-      <motion.div className="cursor__dot" style={{ x: dotX, y: dotY }}
+      <motion.div className="cursor__dot" style={{ x: mx, y: my }}
         animate={variant === "hover" ? { scale: 0 } : { scale: 1 }}
         transition={{ duration: 0.15 }}
       />
@@ -146,10 +115,6 @@ const staggerContainer = {
 const staggerItemUp = {
   hidden: { opacity: 0, y: 56 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.65, ease: [0.22, 1, 0.36, 1] } },
-};
-const staggerItemLeft = {
-  hidden: { opacity: 0, x: -40 },
-  visible: { opacity: 1, x: 0, transition: { duration: 0.65, ease: [0.22, 1, 0.36, 1] } },
 };
 
 function StaggerReveal({ children, className = "" }) {
@@ -230,27 +195,22 @@ function ParticlesBg() {
   return <canvas ref={canvasRef} className="particles-canvas" />;
 }
 
-// ── THEME REVEAL ─────────────────────────────────────────────────
-function ThemeReveal({ x, y, targetDark, onComplete }) {
-  return (
-    <motion.div
-      className="theme-reveal"
-      style={{ background: targetDark ? "#0a0a0a" : "#ffffff" }}
-      initial={{ clipPath: `circle(0px at ${x}px ${y}px)` }}
-      animate={{ clipPath: `circle(200vmax at ${x}px ${y}px)` }}
-      transition={{ duration: 0.65, ease: [0.76, 0, 0.24, 1] }}
-      onAnimationComplete={onComplete}
-    />
-  );
-}
-
 // ── PROJECT MODAL ─────────────────────────────────────────────────
-function ProjectModal({ project, onClose, tr }) {
+function ProjectModal({ project, media: pm, onClose, tr }) {
+  const clips = pm?.clips || [];
+  const count = clips.length;
+  const [idx, setIdx] = useState(pm?.cover || 0);
+  const clip = clips[idx];
+
   useEffect(() => {
-    const onKey = (e) => { if (e.key === "Escape") onClose(); };
+    const onKey = (e) => {
+      if (e.key === "Escape") onClose();
+      if (count > 1 && e.key === "ArrowRight") setIdx(i => (i + 1) % count);
+      if (count > 1 && e.key === "ArrowLeft") setIdx(i => (i - 1 + count) % count);
+    };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [onClose]);
+  }, [onClose, count]);
 
   return (
     <motion.div className="modal-backdrop" onClick={onClose}
@@ -258,37 +218,74 @@ function ProjectModal({ project, onClose, tr }) {
       transition={{ duration: 0.25 }}
     >
       <motion.div
-        className="modal"
+        className={`modal${clip ? " modal--media" : ""}`}
         layoutId={`card-${project.id}`}
         onClick={e => e.stopPropagation()}
         style={{ "--card-color": project.color }}
+        data-lenis-prevent
       >
-        <button className="modal__close" onClick={onClose}>✕</button>
-        <div className="modal__top">
-          <div>
-            <div className="modal__name">{project.name}</div>
-            <div className="project-card__tagline">{tr(project.tagline)}</div>
+        <button className="modal__close" onClick={onClose} aria-label="Close">✕</button>
+
+        {clip && (
+          <div className="modal__player">
+            <video
+              key={clip.src}
+              className="modal__video"
+              src={clip.src}
+              poster={clip.poster}
+              controls
+              autoPlay
+              playsInline
+            />
+            {count > 1 && (
+              <div className="modal__clips">
+                {clips.map((c, i) => (
+                  <button
+                    key={c.src}
+                    className={`modal__clip${i === idx ? " is-active" : ""}`}
+                    onClick={() => setIdx(i)}
+                    aria-label={`Clip ${i + 1}`}
+                  >
+                    <img src={c.poster} alt="" loading="lazy" />
+                  </button>
+                ))}
+              </div>
+            )}
+            <div className="modal__clip-meta">
+              <span>{idx + 1} / {count}</span>
+              {clip.title && <span className="modal__clip-title">{clip.title}</span>}
+            </div>
+          </div>
+        )}
+
+        <div className="modal__info">
+          <div className="modal__head">
+            {pm?.logo && <img src={pm.logo} alt="" className="modal__logo" />}
+            <div>
+              <div className="modal__name">{project.name}</div>
+              <div className="project-card__tagline">{tr(project.tagline)}</div>
+            </div>
           </div>
           <div className="project-card__tags">
             {project.tags.map(tag => <span key={tag} className="project-card__tag">{tag}</span>)}
           </div>
+          <p className="modal__desc">{tr(project.description)}</p>
+          {project.stats && (
+            <div className="project-card__stats">
+              {project.stats.map(s => (
+                <div key={s.label} className="project-card__stat">
+                  <div className="project-card__stat-val"><AnimatedCounter value={s.value} /></div>
+                  <div className="project-card__stat-label">{s.label}</div>
+                </div>
+              ))}
+            </div>
+          )}
+          {project.link && (
+            <a href={project.link} target="_blank" rel="noreferrer" className="btn btn--primary modal__link">
+              {tr(t.projects.view_link)} ↗
+            </a>
+          )}
         </div>
-        <p className="modal__desc">{tr(project.description)}</p>
-        {project.stats && (
-          <div className="project-card__stats">
-            {project.stats.map(s => (
-              <div key={s.label} className="project-card__stat">
-                <div className="project-card__stat-val"><AnimatedCounter value={s.value} /></div>
-                <div className="project-card__stat-label">{s.label}</div>
-              </div>
-            ))}
-          </div>
-        )}
-        {project.link && (
-          <a href={project.link} target="_blank" rel="noreferrer" className="btn btn--primary modal__link">
-            View project ↗
-          </a>
-        )}
       </motion.div>
     </motion.div>
   );
@@ -464,8 +461,8 @@ function Hero({ tr, loaderDone }) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 1.3, duration: 0.6 }}
           >
-            <a href={config.links.fiverr} target="_blank" rel="noreferrer" className="btn btn--primary">
-              {tr(t.hero.cta_fiverr)} ↗
+            <a href={`mailto:${config.email}`} className="btn btn--primary">
+              {tr(t.hero.cta_contact)} ↗
             </a>
             <a href="#projects" className="btn btn--outline">
               {tr(t.hero.cta_projects)}
@@ -542,94 +539,168 @@ function Skills({ tr }) {
 }
 
 // ── PROJECT CARD ─────────────────────────────────────────────────
-function ProjectCard({ project, tr, onOpen }) {
-  const [hovered, setHovered] = useState(false);
-  const cardRef = useRef(null);
-  const rotX = useMotionValue(0);
-  const rotY = useMotionValue(0);
-  const glowX = useMotionValue(50);
-  const glowY = useMotionValue(50);
-  const springRotX = useSpring(rotX, { stiffness: 200, damping: 25 });
-  const springRotY = useSpring(rotY, { stiffness: 200, damping: 25 });
-  const glowBg = useMotionTemplate`radial-gradient(circle at ${glowX}% ${glowY}%, ${project.color}28 0%, transparent 65%)`;
+function VideoPreview({ src, poster, active }) {
+  const ref = useRef(null);
+  useEffect(() => {
+    const v = ref.current;
+    if (!v) return;
+    if (active) v.play().catch(() => {});
+    else v.pause();
+  }, [active]);
+  return (
+    <video ref={ref} className="project-card__video" src={src} poster={poster}
+      muted loop playsInline preload="none" />
+  );
+}
 
-  const onMouseMove = (e) => {
-    const rect = cardRef.current.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / rect.width;
-    const y = (e.clientY - rect.top) / rect.height;
-    rotY.set((x - 0.5) * 14);
-    rotX.set((0.5 - y) * 14);
-    glowX.set(x * 100);
-    glowY.set(y * 100);
-  };
-
-  const onMouseLeave = () => {
-    rotX.set(0); rotY.set(0);
-    glowX.set(50); glowY.set(50);
-  };
+function ProjectCard({ project, media: pm, tr, onOpen }) {
+  const ref = useRef(null);
+  const inView = useInView(ref, { amount: 0.55 });
+  const clips = pm?.clips || [];
+  const cover = clips[pm?.cover || 0];
+  const stat = project.stats?.[0];
 
   return (
-    <motion.div
-      ref={cardRef}
+    <motion.article
+      ref={ref}
       layoutId={`card-${project.id}`}
       variants={staggerItemUp}
       className="project-card"
-      style={{ "--card-color": project.color, "--card-bg": project.bg, rotateX: springRotX, rotateY: springRotY, transformPerspective: 1000 }}
-      onMouseMove={onMouseMove}
-      onMouseLeave={onMouseLeave}
-      onHoverStart={() => setHovered(true)}
-      onHoverEnd={() => setHovered(false)}
-      onClick={onOpen}
+      style={{ "--card-color": project.color }}
       whileHover={{ y: -8 }}
       transition={{ duration: 0.3 }}
+      onClick={onOpen}
     >
-      <motion.div className="project-card__glow" style={{ background: glowBg }} />
-
-      <div className="project-card__header">
-        <div className="project-card__name">{project.name}</div>
+      <div className="project-card__media">
+        {cover
+          ? <VideoPreview src={cover.src} poster={cover.poster} active={inView} />
+          : <div className="project-card__media-empty" style={{ background: project.bg }} />}
+        <div className="project-card__shade" />
+        {stat && (
+          <div className="project-card__badge">
+            <strong>{stat.value}</strong>{stat.label}
+          </div>
+        )}
+        {clips.length > 0 && (
+          <div className="project-card__count">▶ {clips.length} {tr(t.projects.clips)}</div>
+        )}
+      </div>
+      <div className="project-card__body">
+        <div className="project-card__head">
+          {pm?.logo && <img src={pm.logo} alt="" className="project-card__logo" loading="lazy" />}
+          <div>
+            <div className="project-card__name">{project.name}</div>
+            <div className="project-card__tagline">{tr(project.tagline)}</div>
+          </div>
+        </div>
         <div className="project-card__tags">
-          {project.tags.slice(0, 3).map((tag) => (
-            <span key={tag} className="project-card__tag">{tag}</span>
-          ))}
+          {project.tags.slice(0, 3).map(tag => <span key={tag} className="project-card__tag">{tag}</span>)}
         </div>
       </div>
+    </motion.article>
+  );
+}
 
-      <div className="project-card__tagline">{tr(project.tagline)}</div>
+// ── PROJECTS SCROLLER ────────────────────────────────────────────
+function ProjectsScroller({ children, tr }) {
+  const scrollerRef = useRef(null);
+  const trackRef = useRef(null);
+  const inView = useInView(trackRef, { once: true, margin: "-60px" });
+  const drag = useRef({ down: false, startX: 0, startLeft: 0, moved: false });
+  const [progress, setProgress] = useState(0);
+  const [edges, setEdges] = useState({ start: true, end: false });
 
-      <p className="project-card__desc">{tr(project.description)}</p>
+  const update = useCallback(() => {
+    const el = scrollerRef.current;
+    if (!el) return;
+    const max = el.scrollWidth - el.clientWidth;
+    setProgress(max > 0 ? el.scrollLeft / max : 1);
+    setEdges({ start: el.scrollLeft <= 4, end: el.scrollLeft >= max - 4 });
+  }, []);
 
-      {project.stats && (
-        <div className="project-card__stats">
-          {project.stats.map((s) => (
-            <div key={s.label} className="project-card__stat">
-              <div className="project-card__stat-val">
-                <AnimatedCounter value={s.value} />
-              </div>
-              <div className="project-card__stat-label">{s.label}</div>
-            </div>
-          ))}
-        </div>
-      )}
+  useEffect(() => {
+    const el = scrollerRef.current;
+    update();
+    el.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update);
+    return () => {
+      el.removeEventListener("scroll", update);
+      window.removeEventListener("resize", update);
+    };
+  }, [update]);
 
-      {project.link && (
-        <motion.a
-          href={project.link}
-          target="_blank"
-          rel="noreferrer"
-          className="project-card__link"
-          animate={{ opacity: hovered ? 1 : 0, y: hovered ? 0 : 8 }}
-          transition={{ duration: 0.2 }}
+  const step = (dir) => {
+    const el = scrollerRef.current;
+    const card = el.querySelector(".project-card");
+    el.scrollBy({ left: dir * (card ? card.offsetWidth + 24 : el.clientWidth * 0.8), behavior: "smooth" });
+  };
+
+  // Mouse drag-to-scroll (touch devices scroll natively)
+  const onPointerDown = (e) => {
+    if (e.pointerType !== "mouse" || e.button !== 0) return;
+    drag.current = { down: true, startX: e.clientX, startLeft: scrollerRef.current.scrollLeft, moved: false };
+    scrollerRef.current.classList.add("is-dragging");
+  };
+  const onPointerMove = (e) => {
+    const d = drag.current;
+    if (!d.down) return;
+    const dx = e.clientX - d.startX;
+    if (Math.abs(dx) > 6) d.moved = true;
+    scrollerRef.current.scrollLeft = d.startLeft - dx;
+  };
+  const onPointerUp = () => {
+    if (!drag.current.down) return;
+    drag.current.down = false;
+    scrollerRef.current.classList.remove("is-dragging");
+  };
+  // Swallow the click that follows a drag so cards don't open by accident
+  const onClickCapture = (e) => {
+    if (drag.current.moved) {
+      e.stopPropagation();
+      e.preventDefault();
+      drag.current.moved = false;
+    }
+  };
+
+  return (
+    <>
+      <div
+        ref={scrollerRef}
+        className="projects__scroller"
+        data-lenis-prevent-wheel
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={onPointerUp}
+        onPointerLeave={onPointerUp}
+        onClickCapture={onClickCapture}
+      >
+        <motion.div
+          ref={trackRef}
+          className="projects__track"
+          variants={staggerContainer}
+          initial="hidden"
+          animate={inView ? "visible" : "hidden"}
         >
-          View ↗
-        </motion.a>
-      )}
+          {children}
+        </motion.div>
+      </div>
 
-      <motion.div
-        className="project-card__accent"
-        animate={{ opacity: hovered ? 1 : 0, scale: hovered ? 1 : 0.8 }}
-        transition={{ duration: 0.4 }}
-      />
-    </motion.div>
+      <div className="container projects__controls">
+        <span className="projects__hint">{tr(t.projects.drag_hint)}</span>
+        <div className="projects__progress">
+          <motion.div
+            className="projects__progress-bar"
+            initial={{ scaleX: 0 }}
+            animate={{ scaleX: progress }}
+            transition={{ duration: 0.2, ease: "linear" }}
+          />
+        </div>
+        <div className="projects__arrows">
+          <button className="projects__arrow" onClick={() => step(-1)} disabled={edges.start} aria-label="Previous">←</button>
+          <button className="projects__arrow" onClick={() => step(1)} disabled={edges.end} aria-label="Next">→</button>
+        </div>
+      </div>
+    </>
   );
 }
 
@@ -637,17 +708,19 @@ function ProjectCard({ project, tr, onOpen }) {
 function Projects({ tr }) {
   const [selected, setSelected] = useState(null);
   return (
-    <section id="projects" className="section section--alt">
+    <section id="projects" className="section section--alt section--projects">
       <div className="container">
         <SectionHeader label="03" title={tr(t.sections.projects)} />
-        <StaggerReveal className="projects__grid">
-          {projects.map((p) => (
-            <ProjectCard key={p.id} project={p} tr={tr} onOpen={() => setSelected(p)} />
-          ))}
-        </StaggerReveal>
       </div>
+      <ProjectsScroller tr={tr}>
+        {projects.map((p) => (
+          <ProjectCard key={p.id} project={p} media={media[p.id]} tr={tr} onOpen={() => setSelected(p)} />
+        ))}
+      </ProjectsScroller>
       <AnimatePresence>
-        {selected && <ProjectModal project={selected} onClose={() => setSelected(null)} tr={tr} />}
+        {selected && (
+          <ProjectModal project={selected} media={media[selected.id]} onClose={() => setSelected(null)} tr={tr} />
+        )}
       </AnimatePresence>
     </section>
   );
@@ -743,13 +816,6 @@ function Contact({ tr }) {
               onClick={() => toast(tr(t.contact.toast_email), { icon: "✉️" })}
             >
               {tr(t.contact.email)} ↗
-            </a>
-            <a
-              href={config.links.fiverr} target="_blank" rel="noreferrer"
-              className="btn btn--outline"
-              onClick={() => toast(tr(t.contact.toast_fiverr), { icon: "🚀" })}
-            >
-              Fiverr ↗
             </a>
             <a
               href={config.links.linkedin} target="_blank" rel="noreferrer"

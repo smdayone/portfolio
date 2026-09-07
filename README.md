@@ -1,7 +1,7 @@
 # Samuel Reka — Portfolio
 
 Personal portfolio built with React + Framer Motion.
-Live at: https://smdayone.github.io
+Live at: https://smdayone.github.io/portfolio
 
 ## Stack
 - React 18
@@ -28,17 +28,27 @@ npm start          # dev server at localhost:3000
 
 Place your photo at: `public/profile.jpg`
 
+## Project media (videos + logos)
+
+Raw social videos live in `content-source/<project>/` (git-ignored), one folder per
+project plus a `LOGO.jpg`. Compressed copies are generated into `public/media/projects/`
+together with `src/media.js`:
+
+```bash
+node scripts/build-media.js          # encode only new clips
+node scripts/build-media.js --force  # re-encode everything
+```
+
+The folder → project id mapping is the `SLUGS` map at the top of the script and must
+match the `id` used in `src/data.js`. Requires `ffmpeg` (`brew install ffmpeg`).
+
 ## Deploy to GitHub Pages
 
 ```bash
-# First time — set remote
-git remote add origin https://github.com/smdayone/smdayone.github.io.git
-
-# Deploy
-npm run deploy
+git push origin main
 ```
 
-This builds and pushes to the `gh-pages` branch automatically.
+GitHub Actions (`.github/workflows/deploy.yml`) builds and publishes to the `gh-pages` branch automatically.
 
 ## Adding a new project
 

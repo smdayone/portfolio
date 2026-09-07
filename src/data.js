@@ -6,9 +6,9 @@
 export const config = {
   name: "Samuel Reka",
   title: {
-    en: "Digital Marketing & E-commerce Builder",
-    it: "Marketing Digitale & E-commerce",
-    es: "Marketing Digital & E-commerce",
+    en: "Social Media Manager & Content Strategist",
+    it: "Social Media Manager & Content Strategist",
+    es: "Social Media Manager & Estratega de Contenidos",
   },
   tagline: {
     en: "I build content systems, brands, and automated pipelines that drive real results.",
@@ -20,13 +20,13 @@ export const config = {
   photo: `${process.env.PUBLIC_URL}/profile.jpg`,
   cv: `${process.env.PUBLIC_URL}/cv.pdf`,
   typewriterPhrases: [
+    "Social Media Manager & Content Strategist.",
     "Digital Marketing & E-commerce Builder.",
     "Short-Form Video Specialist.",
     "Brand & Automation Architect.",
     "Content Systems Builder.",
   ],
   links: {
-    fiverr: "https://www.fiverr.com/s/NNXEG8V",
     linkedin: "https://www.linkedin.com/in/samuelreka",
     instagram: "https://www.instagram.com/smdayone/",
     github: "https://github.com/smdayone",
@@ -57,6 +57,28 @@ export const skills = [
 // ── PROJECTS ─────────────────────────────────────────────────────
 // Add new projects here — they appear automatically in the grid
 export const projects = [
+  {
+    id: "youscaleit",
+    name: "YouScaleIt",
+    tagline: {
+      en: "Organic content system for a multi-platform scheduling tool",
+      it: "Sistema di contenuti organici per un tool di scheduling multi-piattaforma",
+      es: "Sistema de contenido orgánico para una herramienta de programación multiplataforma",
+    },
+    description: {
+      en: "Social Media Manager & Content Strategist for YouScaleIt, a US-based scheduling platform. Developing and executing the organic content strategy: hook-first short-form videos, repeatable content systems and consistent multi-platform publishing targeting US/UK markets.",
+      it: "Social Media Manager & Content Strategist per YouScaleIt, piattaforma di scheduling USA. Strategia organica, video short-form hook-first e sistemi di contenuto per la pubblicazione multi-piattaforma sui mercati US/UK.",
+      es: "Social Media Manager & Content Strategist para YouScaleIt, plataforma de programación de EE.UU. Estrategia orgánica, videos short-form hook-first y sistemas de contenido multiplataforma para los mercados US/UK.",
+    },
+    tags: ["Social Media", "Content Strategy", "Short-Form", "SaaS"],
+    stats: [
+      { value: "5", label: "Platforms" },
+      { value: "US/UK", label: "Markets" },
+    ],
+    color: "#10B981",
+    bg: "#061410",
+    link: null,
+  },
   {
     id: "viralify",
     name: "Viralify.",
@@ -123,7 +145,7 @@ export const projects = [
     ],
     color: "#5b5b5b",
     bg: "#F5F2EC",
-    link: null,
+    link: "https://www.instagram.com/granvisualcreators",
   },
   {
     id: "ilgustodelgrano",
@@ -197,15 +219,26 @@ export const projects = [
 // Add new experiences here — timeline updates automatically
 export const experience = [
   {
-    role: { en: "Freelance Video Editor & Content Creator", it: "Video Editor & Content Creator Freelance", es: "Editor de Video & Creador de Contenido Freelance" },
-    company: "Fiverr",
-    period: "2026 — Present",
+    role: { en: "Social Media Manager & Content Strategist", it: "Social Media Manager & Content Strategist", es: "Social Media Manager & Estratega de Contenidos" },
+    company: "YouScaleIt",
+    period: "Jun 2026 — Present",
     description: {
-      en: "Creating short-form video ads for e-commerce products. Specializing in hook-first video structure optimized for TikTok, Instagram Reels, and YouTube Shorts.",
-      it: "Video ads short-form per prodotti e-commerce. Specializzato in struttura hook-first per TikTok, Instagram Reels e YouTube Shorts.",
-      es: "Video ads short-form para productos e-commerce. Especializado en estructura hook-first para TikTok, Instagram Reels y YouTube Shorts.",
+      en: "Developing and executing organic content strategy across social media. Creating short-form video to drive brand awareness and user acquisition, and building content systems for consistent multi-platform publishing targeting US/UK markets.",
+      it: "Strategia di contenuti organici sui social. Video short-form per brand awareness e acquisizione utenti, sistemi di contenuto per una pubblicazione multi-piattaforma costante sui mercati US/UK.",
+      es: "Estrategia de contenido orgánico en redes sociales. Video short-form para brand awareness y adquisición de usuarios, y sistemas de contenido multiplataforma para los mercados US/UK.",
     },
     current: true,
+  },
+  {
+    role: { en: "Production Operator", it: "Operatore di Produzione", es: "Operador de Producción" },
+    company: "Interpan",
+    period: "Nov 2025 — Apr 2026",
+    description: {
+      en: "Production operator in an industrial bakery. Rotating morning, afternoon and night shifts in a fast-paced manufacturing environment.",
+      it: "Operatore di produzione in un panificio industriale. Turni a rotazione mattina, pomeriggio e notte in un ambiente produttivo ad alto ritmo.",
+      es: "Operador de producción en una panadería industrial. Turnos rotativos de mañana, tarde y noche en un entorno de fabricación de ritmo rápido.",
+    },
+    current: false,
   },
   {
     role: { en: "Social Media Content Creator", it: "Social Media Content Creator", es: "Creador de Contenido Social Media" },
@@ -269,7 +302,7 @@ export const education = [
   {
     title: { en: "Digital Marketing Essentials Master", it: "Master Digital Marketing Essentials", es: "Master Digital Marketing Essentials" },
     institution: "Talent Garden",
-    period: "2025 — 2026",
+    period: "Sep 2025 — May 2026",
     description: { en: "Funnel marketing, landing pages, content strategy, paid advertising, analytics.", it: "Funnel marketing, landing page, strategia contenuti, advertising, analytics.", es: "Funnel marketing, landing pages, estrategia de contenido, publicidad, analytics." },
   },
   {
@@ -365,24 +398,28 @@ export const t = {
     contact: { en: "Contact", it: "Contatti", es: "Contacto" },
   },
   hero: {
-    cta_fiverr: { en: "Hire me on Fiverr", it: "Assumimi su Fiverr", es: "Contrátame en Fiverr" },
+    cta_contact: { en: "Contact me", it: "Contattami", es: "Contáctame" },
     cta_projects: { en: "View projects", it: "Vedi progetti", es: "Ver proyectos" },
     cta_cv: { en: "Download CV", it: "Scarica CV", es: "Descargar CV" },
     available: { en: "Available for work", it: "Disponibile", es: "Disponible" },
   },
   sections: {
     skills: { en: "Skills", it: "Competenze", es: "Habilidades" },
-    projects: { en: "Selected Projects", it: "Progetti Selezionati", es: "Proyectos Seleccionados" },
+    projects: { en: "Featured Work", it: "Lavori in evidenza", es: "Trabajos destacados" },
     experience: { en: "Experience", it: "Esperienza", es: "Experiencia" },
     education: { en: "Education", it: "Formazione", es: "Educación" },
     testimonials: { en: "Testimonials", it: "Testimonianze", es: "Testimonios" },
     contact: { en: "Let's work together", it: "Lavoriamo insieme", es: "Trabajemos juntos" },
   },
+  projects: {
+    drag_hint: { en: "Drag to explore", it: "Trascina per esplorare", es: "Arrastra para explorar" },
+    view_link: { en: "View on Instagram", it: "Vedi su Instagram", es: "Ver en Instagram" },
+    clips: { en: "clips", it: "clip", es: "clips" },
+  },
   contact: {
     subtitle: { en: "Open to freelance projects, collaborations, and full-time opportunities.", it: "Aperto a progetti freelance, collaborazioni e opportunità a tempo pieno.", es: "Abierto a proyectos freelance, colaboraciones y oportunidades a tiempo completo." },
     email: { en: "Send an email", it: "Invia email", es: "Enviar email" },
     toast_email: { en: "Opening email client...", it: "Apertura client email...", es: "Abriendo correo..." },
-    toast_fiverr: { en: "Opening Fiverr ↗", it: "Apertura Fiverr ↗", es: "Abriendo Fiverr ↗" },
     toast_linkedin: { en: "Opening LinkedIn ↗", it: "Apertura LinkedIn ↗", es: "Abriendo LinkedIn ↗" },
   },
 };
