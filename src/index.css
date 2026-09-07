@@ -564,9 +564,12 @@ img { max-width: 100%; display: block; }
   overflow: hidden;
   position: relative;
   cursor: pointer;
-  transition: border-color var(--transition), box-shadow var(--transition);
+  transition: border-color var(--transition), box-shadow var(--transition), transform var(--transition);
 }
-.project-card:hover { border-color: var(--border-hover); box-shadow: var(--shadow-hover); }
+.project-card:hover {
+  border-color: var(--card-color, var(--border-hover));
+  box-shadow: var(--shadow-hover), 0 0 0 1px var(--card-color, transparent);
+}
 
 .project-card::before {
   content: '';
@@ -589,26 +592,61 @@ img { max-width: 100%; display: block; }
 .project-card__shade {
   position: absolute; inset: 0;
   pointer-events: none;
-  background: linear-gradient(to top, rgba(0,0,0,0.55) 0%, transparent 40%);
+  background: linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 45%);
+  transition: background var(--transition);
+}
+.project-card:hover .project-card__shade { background: rgba(0,0,0,0.45); }
+
+/* Central play affordance — makes it obvious the whole media area is clickable */
+.project-card__play {
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 56px; height: 56px;
+  transform: translate(-50%, -50%) scale(0.7);
+  border-radius: 50%;
+  background: rgba(0,0,0,0.4);
+  border: 1.5px solid rgba(255,255,255,0.5);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  padding-left: 3px; /* optical centering for the play triangle */
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease, transform 0.25s ease, background var(--transition);
+}
+.project-card:hover .project-card__play {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+  background: var(--card-color, rgba(0,0,0,0.55));
+  border-color: transparent;
 }
 
 .project-card__badge,
 .project-card__count {
   position: absolute; top: 16px;
-  font-size: 11px;
-  letter-spacing: 0.04em;
+  font-size: 11.5px;
+  letter-spacing: 0.02em;
   color: #fff;
-  background: rgba(0,0,0,0.45);
-  border: 1px solid rgba(255,255,255,0.15);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  padding: 5px 10px;
+  background: rgba(10,10,10,0.72);
+  border: 1px solid rgba(255,255,255,0.22);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  padding: 6px 11px;
   border-radius: 100px;
   white-space: nowrap;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.25);
 }
 .project-card__badge { left: 16px; }
 .project-card__badge strong { color: var(--card-color, var(--highlight)); font-weight: 800; margin-right: 5px; }
-.project-card__count { right: 16px; font-weight: 600; }
+.project-card__count {
+  right: 16px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.project-card__count svg { flex-shrink: 0; opacity: 0.9; }
 
 .project-card__body { padding: 18px 20px 20px; }
 

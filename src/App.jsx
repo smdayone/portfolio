@@ -582,8 +582,14 @@ function ProjectCard({ project, media: pm, tr, onOpen }) {
           </div>
         )}
         {clips.length > 0 && (
-          <div className="project-card__count">▶ {clips.length} {tr(t.projects.clips)}</div>
+          <div className="project-card__count">
+            <svg viewBox="0 0 24 24" width="11" height="11" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+            {clips.length} {tr(t.projects.clips)}
+          </div>
         )}
+        <div className="project-card__play">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+        </div>
       </div>
       <div className="project-card__body">
         <div className="project-card__head">
@@ -635,18 +641,23 @@ function ProjectsScroller({ children, tr }) {
     el.scrollBy({ left: dir * (card ? card.offsetWidth + 24 : el.clientWidth * 0.8), behavior: "smooth" });
   };
 
-  // Mouse drag-to-scroll (touch devices scroll natively)
+  // Mouse drag-to-scroll (touch devices scroll natively).
+  // is-dragging (which disables pointer-events on cards) is only applied
+  // once real movement is detected — never on a plain mousedown+click,
+  // otherwise the click's own hit-test lands on nothing and onOpen never fires.
   const onPointerDown = (e) => {
     if (e.pointerType !== "mouse" || e.button !== 0) return;
     drag.current = { down: true, startX: e.clientX, startLeft: scrollerRef.current.scrollLeft, moved: false };
-    scrollerRef.current.classList.add("is-dragging");
   };
   const onPointerMove = (e) => {
     const d = drag.current;
     if (!d.down) return;
     const dx = e.clientX - d.startX;
-    if (Math.abs(dx) > 6) d.moved = true;
-    scrollerRef.current.scrollLeft = d.startLeft - dx;
+    if (Math.abs(dx) > 6 && !d.moved) {
+      d.moved = true;
+      scrollerRef.current.classList.add("is-dragging");
+    }
+    if (d.moved) scrollerRef.current.scrollLeft = d.startLeft - dx;
   };
   const onPointerUp = () => {
     if (!drag.current.down) return;
