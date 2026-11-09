@@ -330,39 +330,6 @@ export const experience = [
     },
     current: false,
   },
-  {
-    role: { en: "Automotive Mechanic", it: "Meccanico automobilistico", es: "Mecánico de Automóviles" },
-    company: "Winner Car",
-    period: "Aug 2017 — Jul 2018",
-    description: {
-      en: "Routine maintenance of mechanical parts (spark plugs, oil, filters), fault prevention and first-response repairs, dismantling and reassembling engine parts, and keeping the workshop organized. Strong under pressure and in team work.",
-      it: "Manutenzione ordinaria di parti meccaniche (candele, olio, filtri), prevenzione guasti e primo intervento, smontaggio e rimontaggio di parti del motore, cura dell'ordine in officina. Ottima capacità di lavorare sotto stress e in team.",
-      es: "Mantenimiento ordinario de piezas mecánicas (bujías, aceite, filtros), prevención de averías y primera intervención, desmontaje y montaje de piezas del motor, y orden del taller. Gran capacidad de trabajo bajo presión y en equipo.",
-    },
-    current: false,
-  },
-  {
-    role: { en: "Auto Body Technician", it: "Carrozziere", es: "Chapista" },
-    company: "Carrozzeria Ciuffi",
-    period: "Aug 2014 — Jul 2015",
-    description: {
-      en: "Sanding, localized touch-ups, use of drying ovens and primer application (pre-paint).",
-      it: "Carteggiatura, ritocco localizzato, uso dei forni di asciugatura e applicazione del fondo (pre-vernice).",
-      es: "Lijado, retoques localizados, uso de hornos de secado y aplicación de la imprimación (previa a la pintura).",
-    },
-    current: false,
-  },
-  {
-    role: { en: "Automotive Mechanic", it: "Meccanico automobilistico", es: "Mecánico de Automóviles" },
-    company: "Integrauto SNC",
-    period: "Aug 2014 — Apr 2015",
-    description: {
-      en: "Workshop assistant: full services including oil, oil-filter, air-filter and pollen-filter changes, fixing dashboard fault warnings, and front/rear brake pad replacement (disc and drum).",
-      it: "Aiuto operaio: tagliandi con sostituzione di olio, filtro olio, filtro aria e filtro antipolline, riparazione delle segnalazioni di errore sul quadro e sostituzione pastiglie freno (disco/tamburo) anteriori e posteriori.",
-      es: "Ayudante de taller: revisiones con cambio de aceite y de los filtros de aceite, aire y polen, reparación de los avisos de error del cuadro y sustitución de pastillas de freno (disco/tambor) delanteras y traseras.",
-    },
-    current: false,
-  },
 ];
 
 // ── EDUCATION ────────────────────────────────────────────────────
